@@ -1,6 +1,7 @@
 import socket
 import subprocess
-## need to change server/client socket variable name.
+import argparse
+
 def start_server(host='0.0.0.0', port=9999):
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((host, port))
@@ -13,30 +14,24 @@ def start_server(host='0.0.0.0', port=9999):
 
         # Receive command from client
         command = client_socket.recv(1024).decode('utf-8')
-        print(f"Received command: {command}")
-
-        # # Handle the command
-        # if command == "PRINT_HELLO":
-        #     print("Hello World", flush=True)
+        print(f"Received command: {command}") 
         
-        #TODO: handle if command is grep, run grep on a file called machine.i.log and return the result to client
-         # Handle the command
+        # Handle the command
         if "grep" in command:
             try:
                 # Run the grep command on the machine.i.log file
-                result = subprocess.check_output(f"{command} machine.i.log", shell=True)
+                result = subprocess.check_output(f"{command} machine.{port}.log", shell=True)
                 # Send the grep result back to the client
                 client_socket.sendall(result)
-            except subprocess.CalledProcessError as e:
-                # If grep fails (e.g., no matches), send a failure message
-                client_socket.sendall(b"No matching lines found or grep failed.")
-        else:
-            # Send an error message if the command is not recognized
-            client_socket.sendall(b"Unknown command.")
-
-        # Send acknowledgment back to client
-        #client_socket.sendall(b"Command received")
+            except subprocess.CalledProcessError as _:
+                pass
         client_socket.close()
 
 if __name__ == "__main__":
-    start_server()
+    # Set up argparse to handle command-line arguments for host and port
+    parser = argparse.ArgumentParser(description='Start a grep server')
+    parser.add_argument('--port', type=int, default=9999, help='Port number for the server')
+
+    args = parser.parse_args()
+
+    start_server(port=args.port)
