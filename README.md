@@ -1,6 +1,6 @@
 # CS425_MP1
 
-currently no vms supplied. 
+fa24-cs425-70XX.cs.illinois.edu
 
 to test: 
 
